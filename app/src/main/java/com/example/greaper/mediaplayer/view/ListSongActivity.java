@@ -18,12 +18,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.greaper.mediaplayer.R;
 import com.example.greaper.mediaplayer.controller.AddSongAdapter;
 import com.example.greaper.mediaplayer.controller.ISong;
+import com.example.greaper.mediaplayer.controller.ImpAddSong;
 import com.example.greaper.mediaplayer.controller.ListSongAdapter;
 import com.example.greaper.mediaplayer.controller.SongManager;
 import com.example.greaper.mediaplayer.database.SongDataSource;
@@ -32,7 +35,7 @@ import com.example.greaper.mediaplayer.model.SongModel;
 
 import java.util.ArrayList;
 
-public class ListSongActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class ListSongActivity extends AppCompatActivity implements ImpAddSong, View.OnClickListener {
 
     Toolbar toolbar;
     private ListView lvListSong;
@@ -41,6 +44,7 @@ public class ListSongActivity extends AppCompatActivity implements AdapterView.O
     private SongManager songManager;
     private SongDataSource songDataSource;
     private ArrayList<SongModel> listSongInDatabase;
+    private CheckBox checkBoxSelectAll;
 
 
     @Override
@@ -54,8 +58,7 @@ public class ListSongActivity extends AppCompatActivity implements AdapterView.O
         initToolbar();
         songManager = new SongManager();
         listSong = songManager.getSongList();
-        songManager = new SongManager();
-        addSongAdapter = new AddSongAdapter(listSong, this);
+        addSongAdapter = new AddSongAdapter(listSong, this, this);
         songDataSource = new SongDataSource(this);
         songDataSource.open();
 
@@ -71,7 +74,18 @@ public class ListSongActivity extends AppCompatActivity implements AdapterView.O
             }
         }
         lvListSong.setAdapter(addSongAdapter);
-        lvListSong.setOnItemClickListener(this);
+        lvListSong.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (listSong.get(i).isSelect()) {
+                    listSong.get(i).setSelect(false);
+                } else {
+                    listSong.get(i).setSelect(true);
+                }
+                checkBoxSelectAll.setChecked(isSelectingAll());
+                addSongAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private int getIndex(String itemName)
@@ -97,17 +111,13 @@ public class ListSongActivity extends AppCompatActivity implements AdapterView.O
 
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//        Intent intent = new Intent();
-//        intent.putExtra("id", i);
-//        setResult(RESULT_OK, intent);
-//        finish();
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.add_menu, menu);
+        checkBoxSelectAll = (CheckBox) menu.findItem(R.id.select_all).getActionView();
+        checkBoxSelectAll.setText("");
+        checkBoxSelectAll.setChecked(isSelectingAll());
+        checkBoxSelectAll.setOnClickListener(this);
         return true;
     }
 
@@ -134,5 +144,28 @@ public class ListSongActivity extends AppCompatActivity implements AdapterView.O
     protected void onDestroy() {
         songDataSource.close();
         super.onDestroy();
+    }
+
+    // check all checkbox is selecting
+    private boolean isSelectingAll() {
+        for (AddSongModel add : listSong) {
+            if (!add.isSelect()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void checkCheckBoxSelectAll() {
+        checkBoxSelectAll.setChecked(isSelectingAll());
+    }
+
+    @Override
+    public void onClick(View view) {
+        for (AddSongModel addSong : listSong) {
+            addSong.setSelect(checkBoxSelectAll.isChecked());
+        }
+        addSongAdapter.notifyDataSetChanged();
     }
 }

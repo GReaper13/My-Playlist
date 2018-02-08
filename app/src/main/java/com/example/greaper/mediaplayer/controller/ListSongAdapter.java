@@ -55,16 +55,22 @@ public class ListSongAdapter extends BaseAdapter {
             view = layoutInflater.inflate(R.layout.song_item, viewGroup, false);
 
             viewHolder = new ViewHolder();
-            viewHolder.txtItem = view.findViewById(R.id.txt_item_list_song);
-            viewHolder.imgItemSong = view.findViewById(R.id.img_item_song);
+            viewHolder.txtName = view.findViewById(R.id.txt_name_item_list_song);
+            viewHolder.txtSinger = view.findViewById(R.id.txt_singer_item_list_song);
+            viewHolder.txtNumber = view.findViewById(R.id.txt_number_item_list_song);
             view.setTag(viewHolder);
-
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }
-
-        viewHolder.txtItem.setText(list.get(i).getTitle());
-        viewHolder.imgItemSong.setOnClickListener(new View.OnClickListener() {
+        String[] title_str = list.get(i).getTitle().split("-");
+        if (title_str.length < 2) {
+            viewHolder.txtSinger.setText("");
+        } else {
+            viewHolder.txtSinger.setText(title_str[1]);
+        }
+        viewHolder.txtName.setText(title_str[0]);
+        viewHolder.txtNumber.setText(String.valueOf(i+1));
+        viewHolder.txtNumber.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 iSong.showSong(list.get(i));
@@ -74,7 +80,6 @@ public class ListSongAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
-        TextView txtItem;
-        ImageView imgItemSong;
+        TextView txtName, txtNumber, txtSinger;
     }
 }

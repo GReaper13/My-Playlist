@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Toolbar toolbar;
 
-    public static ArrayList<AddSongModel> listSong = new ArrayList<>();
+    public ArrayList<SongModel> listSong;
     private int currentSongIndex = 0;
     private MediaPlayer mediaPlayer;
     private Handler mHandler = new Handler();
@@ -62,8 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btnPlay, btnToNext, btnNext, btnToPrev, btnPrev;
     private SeekBar seekbar;
     private TextView txtCurrent, txtTotal;
-    SongManager songManager = new SongManager();
-    private Animation animation;
     private ViewPager viewPager;
     private PageAdapter pageAdapter;
     private ImageView iconDisc, iconList;
@@ -78,20 +76,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        if (Build.VERSION.SDK_INT >= 23) {
            check();
        } else {
-           listSong = songManager.getSongList();
+           initCurrentSong();
            initViews();
        }
 
         setSupportActionBar(toolbar);
-
-
     }
 
     private void initViews() {
         viewPager = (ViewPager) findViewById(R.id.vp_main);
         mediaPlayer = new MediaPlayer();
-        songDataSource = new SongDataSource(this);
-        songDataSource.open();
         btnPlay = (Button) findViewById(R.id.btn_play);
         btnNext = (Button) findViewById(R.id.btn_next);
         btnToNext = (Button) findViewById(R.id.btn_to_next);
@@ -102,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         txtTotal = (TextView) findViewById(R.id.txt_total);
         iconDisc = (ImageView) findViewById(R.id.icon_disc);
         iconList = (ImageView) findViewById(R.id.icon_list_current_song);
-        animation = AnimationUtils.loadAnimation(this, R.anim.rotate);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         pageAdapter = new PageAdapter(fragmentManager);
@@ -127,6 +120,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.reset();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             //Log.d("abc", String.valueOf(listSong.size()));
+            if (listSong.size() == 0 || listSong == null) {
+                return;
+            }
             mediaPlayer.setDataSource(listSong.get(currentSongIndex).getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
@@ -288,6 +284,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SELECT_SONG_REQUEST && resultCode == RESULT_OK) {
             ((ListSong)pageAdapter.getRegisteredFragment(1)).updateListCurrentSong();
+            initCurrentSong();
+            playSong(0);
         }
     }
 
@@ -310,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST_READ_STORAGE);
             }
         } else {
-            listSong = songManager.getSongList();
+            initCurrentSong();
             initViews();
         }
     }
@@ -320,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case MY_PERMISSION_REQUEST_READ_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    listSong = songManager.getSongList();
+                    initCurrentSong();
                     initViews();
                 } else {
                     onDestroy();
@@ -339,6 +337,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void clickSong(int position) {
         playSong(position);
+        currentSongIndex = position;
     }
 
     private void initViewsIcon() {
@@ -367,5 +366,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    private void initCurrentSong() {
+        songDataSource = new SongDataSource(this);
+        songDataSource.open();
+        listSong = songDataSource.getCurrentSong();
+        if (listSong == null) {
+            listSong = new ArrayList<>();
+        }
     }
 }

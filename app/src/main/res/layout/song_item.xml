@@ -7,18 +7,41 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_gravity="center">
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_music"
-            android:id="@+id/img_item_song"/>
-        <TextView
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Show me your magic"
-            android:layout_gravity="center"
-            android:textSize="17sp"
-            android:textColor="#000000"
-            android:id="@+id/txt_item_list_song"/>
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1"
+                android:layout_margin="25dp"
+                android:textSize="20sp"
+                android:id="@+id/txt_number_item_list_song"
+                android:textStyle="bold"
+                android:textColor="#000000"/>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show me your magic"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:id="@+id/txt_name_item_list_song"
+                android:layout_weight="1"
+                android:gravity="bottom"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Show me your magic"
+                android:textSize="15sp"
+                android:textColor="#424658"
+                android:id="@+id/txt_singer_item_list_song"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>
