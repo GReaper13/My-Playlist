@@ -287,8 +287,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SELECT_SONG_REQUEST && resultCode == RESULT_OK) {
-            currentSongIndex = data.getExtras().getInt("id");
-            playSong(currentSongIndex);
+            ((ListSong)pageAdapter.getRegisteredFragment(1)).updateListCurrentSong();
         }
     }
 

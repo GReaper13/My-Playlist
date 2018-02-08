@@ -1,11 +1,13 @@
 package com.example.greaper.mediaplayer.controller;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.example.greaper.mediaplayer.R;
@@ -47,7 +49,7 @@ public class AddSongAdapter extends BaseAdapter {
         CheckBox checkBox;
     }
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, ViewGroup viewGroup) {
         ViewHolder viewHolder;
         if (view == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -61,6 +63,12 @@ public class AddSongAdapter extends BaseAdapter {
         }
         viewHolder.txtTitle.setText(listAddSong.get(i).getTitle());
         viewHolder.checkBox.setChecked(listAddSong.get(i).isSelect());
+        viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                listAddSong.get(i).setSelect(b);
+            }
+        });
         return view;
     }
 }

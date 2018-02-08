@@ -52,12 +52,11 @@ public class ListSongAdapter extends BaseAdapter {
         ViewHolder viewHolder;
         if (view == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view = layoutInflater.inflate(R.layout.song_item_add, viewGroup, false);
+            view = layoutInflater.inflate(R.layout.song_item, viewGroup, false);
 
             viewHolder = new ViewHolder();
             viewHolder.txtItem = view.findViewById(R.id.txt_item_list_song);
             viewHolder.imgItemSong = view.findViewById(R.id.img_item_song);
-            viewHolder.checkBox = view.findViewById(R.id.cb_add_song);
             view.setTag(viewHolder);
 
         } else {
@@ -77,6 +76,5 @@ public class ListSongAdapter extends BaseAdapter {
     private class ViewHolder {
         TextView txtItem;
         ImageView imgItemSong;
-        CheckBox checkBox;
     }
 }

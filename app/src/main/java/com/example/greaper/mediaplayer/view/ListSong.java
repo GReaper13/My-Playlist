@@ -32,7 +32,6 @@ public class ListSong extends Fragment implements ISong, AdapterView.OnItemClick
     private OnFragmentInteractionListener mListener;
     private ListSongAdapter adapter;
     private ListView listView;
-    private SongManager songManager;
     private SongDataSource songDataSource;
 
     public ListSong() {
@@ -68,16 +67,25 @@ public class ListSong extends Fragment implements ISong, AdapterView.OnItemClick
     }
 
     private void initViews(View view) {
-        listSong = new ArrayList<>();
-        songManager = new SongManager();
-        adapter = new ListSongAdapter(listSong, getContext(), this);
         songDataSource = new SongDataSource(getActivity());
         songDataSource.open();
+
         listSong = songDataSource.getCurrentSong();
+        if (listSong == null) {
+            listSong = new ArrayList<>();
+        }
+        adapter = new ListSongAdapter(listSong, getActivity(), this);
 
         listView = view.findViewById(R.id.lv_current_song);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
+    }
+
+    public void updateListCurrentSong() {
+        listSong = songDataSource.getCurrentSong();
+        adapter = new ListSongAdapter(listSong, getContext(), this);
+        listView.setAdapter(adapter);
+//        adapter.notifyDataSetChanged();
     }
 
 //    public void onButtonPressed(Uri uri) {

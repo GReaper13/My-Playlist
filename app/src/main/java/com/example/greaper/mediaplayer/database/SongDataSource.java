@@ -69,6 +69,10 @@ public class SongDataSource {
         return arrayList;
     }
 
+    public void deleteAllSong() {
+        sqLiteDatabase.delete(TABLE_NAME, null, null);
+    }
+
     private SongModel cursorToModel (Cursor cursor) {
         SongModel song = new SongModel(cursor.getString(1), cursor.getString(2));
         return song;
