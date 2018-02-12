@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TabWidget;
@@ -43,6 +44,8 @@ import com.example.greaper.mediaplayer.model.SongModel;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import me.relex.circleindicator.CircleIndicator;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener, MediaPlayer.OnCompletionListener, ListSong.OnFragmentInteractionListener, ViewPager.OnPageChangeListener {
 
     public static final int SELECT_SONG_REQUEST = 0;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final int SEEK_BACKWARD_TIME = 5000;
     final int MY_PERMISSION_REQUEST_READ_STORAGE = 0;
     private boolean isUsingSeekBar = false;
+    private boolean isEditSong = false;
 
     private Toolbar toolbar;
 
@@ -61,18 +65,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btnPlay, btnToNext, btnNext, btnToPrev, btnPrev;
     private SeekBar seekbar;
-    private TextView txtCurrent, txtTotal;
+    private TextView txtCurrent, txtTotal, txtCurrentSong;
     private ViewPager viewPager;
     private PageAdapter pageAdapter;
-    private ImageView iconDisc, iconList;
+    private CircleIndicator circleIndicator;
+    private CheckBox checkBoxAll;
+
+    private Menu menu;
 
    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Mp3 Player");
+
+
        if (Build.VERSION.SDK_INT >= 23) {
            check();
        } else {
@@ -80,10 +87,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
            initViews();
        }
 
-        setSupportActionBar(toolbar);
+
     }
 
     private void initViews() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         viewPager = (ViewPager) findViewById(R.id.vp_main);
         mediaPlayer = new MediaPlayer();
         btnPlay = (Button) findViewById(R.id.btn_play);
@@ -94,13 +102,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekbar = (SeekBar) findViewById(R.id.seekbar);
         txtCurrent = (TextView) findViewById(R.id.txt_current);
         txtTotal = (TextView) findViewById(R.id.txt_total);
-        iconDisc = (ImageView) findViewById(R.id.icon_disc);
-        iconList = (ImageView) findViewById(R.id.icon_list_current_song);
+        circleIndicator = findViewById(R.id.indicator);
+        txtCurrentSong = toolbar.findViewById(R.id.txt_current_song);
+        checkBoxAll = toolbar.findViewById(R.id.cb_all_list_song);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         pageAdapter = new PageAdapter(fragmentManager);
         viewPager.setAdapter(pageAdapter);
-        initViewsIcon();
+        circleIndicator.setViewPager(viewPager);
+        setSupportActionBar(toolbar);
 
         btnPlay.setOnClickListener(this);
         btnToNext.setOnClickListener(this);
@@ -112,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekbar.setOnSeekBarChangeListener(this);
         mediaPlayer.setOnCompletionListener(this);
 
+        checkBoxAll.setVisibility(View.INVISIBLE);
         playSong(currentSongIndex);
     }
 
@@ -119,18 +130,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             mediaPlayer.reset();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            //Log.d("abc", String.valueOf(listSong.size()));
             if (listSong.size() == 0 || listSong == null) {
                 return;
             }
             mediaPlayer.setDataSource(listSong.get(currentSongIndex).getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
-            toolbar.setTitle(listSong.get(currentSongIndex).getTitle());
+            txtCurrentSong.setText(listSong.get(currentSongIndex).getTitle());
             seekbar.setProgress(0);
             seekbar.setMax(100);
             btnPlay.setBackgroundResource(R.drawable.pause);
-            //imgMain.startAnimation(animation);
 
             updateProress();
 
@@ -172,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.header_menu, menu);
+        menu.getItem(0).setVisible(false);
+        menu.getItem(1).setVisible(false);
+        this.menu = menu;
         return true;
     }
 
@@ -239,8 +251,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.list_song:
+                if (!isEditSong) {
+                    startEditSong();
+                    ((ListSong)pageAdapter.getRegisteredFragment(1)).editSong(isEditSong);
+                } else {
+                    endEditSong();
+                    ((ListSong)pageAdapter.getRegisteredFragment(1)).updateListCurrentSong(isEditSong);
+                }
+                //initCurrentSong();
+                break;
+            case R.id.add_song:
                 Intent intent = new Intent(MainActivity.this, ListSongActivity.class);
                 startActivityForResult(intent, SELECT_SONG_REQUEST);
+                endEditSong();
                 break;
         }
         return true;
@@ -283,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SELECT_SONG_REQUEST && resultCode == RESULT_OK) {
-            ((ListSong)pageAdapter.getRegisteredFragment(1)).updateListCurrentSong();
+            ((ListSong)pageAdapter.getRegisteredFragment(1)).updateListCurrentSong(isEditSong);
             initCurrentSong();
             playSong(0);
         }
@@ -340,19 +363,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         currentSongIndex = position;
     }
 
-    private void initViewsIcon() {
-        switch (viewPager.getCurrentItem()) {
-            case 0:
-                iconDisc.setImageResource(R.drawable.lock_open);
-                iconList.setImageResource(R.drawable.lock_black);
-                break;
-            case 1:
-                iconDisc.setImageResource(R.drawable.lock_black);
-                iconList.setImageResource(R.drawable.lock_open);
-                break;
-        }
-    }
-
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -360,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onPageSelected(int position) {
-        initViewsIcon();
+        //initViewsIcon();
     }
 
     @Override
@@ -375,5 +385,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (listSong == null) {
             listSong = new ArrayList<>();
         }
+    }
+
+    private void startEditSong() {
+        isEditSong = !isEditSong;
+        menu.getItem(0).setVisible(true);
+        menu.getItem(1).setVisible(true);
+        menu.getItem(2).setIcon(R.drawable.check);
+        checkBoxAll.setVisibility(View.VISIBLE);
+        txtCurrentSong.setVisibility(View.INVISIBLE);
+    }
+
+    private void endEditSong() {
+        isEditSong = !isEditSong;
+        menu.getItem(0).setVisible(false);
+        menu.getItem(1).setVisible(false);
+        menu.getItem(2).setIcon(R.drawable.edit);
+        checkBoxAll.setVisibility(View.INVISIBLE);
+        txtCurrentSong.setVisibility(View.VISIBLE);
     }
 }
