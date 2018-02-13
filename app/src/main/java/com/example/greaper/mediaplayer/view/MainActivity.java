@@ -5,40 +5,30 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.greaper.mediaplayer.R;
 import com.example.greaper.mediaplayer.Utils.Utils;
-import com.example.greaper.mediaplayer.controller.IntMain;
 import com.example.greaper.mediaplayer.controller.PageAdapter;
-import com.example.greaper.mediaplayer.controller.SongManager;
 import com.example.greaper.mediaplayer.database.SongDataSource;
-import com.example.greaper.mediaplayer.model.AddSongModel;
 import com.example.greaper.mediaplayer.model.SongModel;
 
 import java.io.IOException;
@@ -77,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
        if (Build.VERSION.SDK_INT >= 23) {
            check();
@@ -123,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer.setOnCompletionListener(this);
 
         checkBoxAll.setVisibility(View.INVISIBLE);
+        checkBoxAll.setOnClickListener(this);
         playSong(currentSongIndex);
     }
 
@@ -245,6 +234,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             buildNotification();
         }
 
+        if (id == R.id.cb_all_list_song) {
+            ((ListSong)pageAdapter.getRegisteredFragment(1)).clickSelectAll(checkBoxAll.isChecked());
+        }
     }
 
     @Override
@@ -265,6 +257,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(intent, SELECT_SONG_REQUEST);
                 endEditSong();
                 break;
+            case R.id.delete_song:
+                boolean isDeleteSongIsPlaying = ((ListSong)pageAdapter.getRegisteredFragment(1)).deleteSong(listSong.get(currentSongIndex).getTitle());
+                initCurrentSong();
+                if (isDeleteSongIsPlaying) {
+                    playSong(0);
+                    currentSongIndex = 0;
+                    // TODO
+                }
+                endEditSong();
         }
         return true;
     }
@@ -364,6 +365,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public void checkCheckBox(boolean isSelectingAll) {
+        checkBoxAll.setChecked(isSelectingAll);
+    }
+
+    @Override
+    public void hasSongSelected(boolean hasSongSelected) {
+        menu.getItem(0).setVisible(hasSongSelected);
+    }
+
+    @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
     }
@@ -389,10 +400,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startEditSong() {
         isEditSong = !isEditSong;
-        menu.getItem(0).setVisible(true);
+        menu.getItem(0).setVisible(false);
         menu.getItem(1).setVisible(true);
         menu.getItem(2).setIcon(R.drawable.check);
         checkBoxAll.setVisibility(View.VISIBLE);
+        checkBoxAll.setChecked(false);
         txtCurrentSong.setVisibility(View.INVISIBLE);
     }
 
