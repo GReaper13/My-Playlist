@@ -129,7 +129,7 @@ public class ListSongActivity extends AppCompatActivity implements ImpAddSong, V
                 for (int i = 0; i < listSong.size(); i++) {
                     if (listSong.get(i).isSelect()) {
                         AddSongModel add = listSong.get(i);
-                        songDataSource.addNewSong(new SongModel(add.getTitle(), add.getPath()));
+                        songDataSource.addNewSong(new SongModel(add.getTitle(), add.getPath(), i));
                     }
                 }
                 songDataSource.close();

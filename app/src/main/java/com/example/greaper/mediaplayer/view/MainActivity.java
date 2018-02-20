@@ -263,7 +263,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (isDeleteSongIsPlaying) {
                     playSong(0);
                     currentSongIndex = 0;
-                    // TODO
+                    // TODO this can have some bugs
+                    // some bugs in remove listsong in ListSongFrag
                 }
                 endEditSong();
         }

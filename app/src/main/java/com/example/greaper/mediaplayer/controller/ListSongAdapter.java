@@ -1,13 +1,16 @@
 package com.example.greaper.mediaplayer.controller;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.textclassifier.TextClassification;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.greaper.mediaplayer.R;
@@ -24,11 +27,15 @@ public class ListSongAdapter extends BaseAdapter {
     private ArrayList<SongModel> list = new ArrayList<>();
     private Context context;
     private ISong iSong;
+    private boolean isEditSong;
+    private ImpListSong impListSong;
 
-    public ListSongAdapter(ArrayList<SongModel> list, Context context, ISong iSong) {
+    public ListSongAdapter(ArrayList<SongModel> list, Context context, ISong iSong, boolean isEditSong, ImpListSong impListSong) {
         this.list = list;
         this.context = context;
         this.iSong = iSong;
+        this.isEditSong = isEditSong;
+        this.impListSong = impListSong;
     }
 
     @Override
@@ -58,6 +65,9 @@ public class ListSongAdapter extends BaseAdapter {
             viewHolder.txtName = view.findViewById(R.id.txt_name_item_list_song);
             viewHolder.txtSinger = view.findViewById(R.id.txt_singer_item_list_song);
             viewHolder.txtNumber = view.findViewById(R.id.txt_number_item_list_song);
+            viewHolder.checkBox = view.findViewById(R.id.cb_item_list_song);
+            viewHolder.imageView = view.findViewById(R.id.img_change_song);
+            viewHolder.linearLayout = view.findViewById(R.id.ll_item_list_song);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -76,10 +86,50 @@ public class ListSongAdapter extends BaseAdapter {
                 iSong.showSong(list.get(i));
             }
         });
+        changeBackgroundItem(viewHolder, i);
+        viewHolder.checkBox.setChecked(list.get(i).isSelectToDelete());
+        if (isEditSong) {
+            viewHolder.txtNumber.setVisibility(View.INVISIBLE);
+            viewHolder.imageView.setVisibility(View.VISIBLE);
+            viewHolder.checkBox.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.txtNumber.setVisibility(View.VISIBLE);
+            viewHolder.imageView.setVisibility(View.INVISIBLE);
+            viewHolder.checkBox.setVisibility(View.INVISIBLE);
+        }
+        final ViewHolder viewHolder1 = viewHolder;
+        viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                list.get(i).setSelectToDelete(isChecked);
+                changeBackgroundItem(viewHolder1, i);
+                impListSong.checkCheckBoxSelectAll();
+                impListSong.checkHasASongSelected();
+            }
+        });
         return view;
     }
 
     private class ViewHolder {
         TextView txtName, txtNumber, txtSinger;
+        CheckBox checkBox;
+        ImageView imageView;
+        LinearLayout linearLayout;
+    }
+
+    public boolean isEditSong() {
+        return isEditSong;
+    }
+
+    public void setEditSong(boolean editSong) {
+        isEditSong = editSong;
+    }
+
+    private void changeBackgroundItem(ViewHolder viewHolder, int i) {
+        if (list.get(i).isSelectToDelete()) {
+            viewHolder.linearLayout.setBackgroundColor(Color.parseColor("#FF10E7D5"));
+        } else {
+            viewHolder.linearLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+        }
     }
 }

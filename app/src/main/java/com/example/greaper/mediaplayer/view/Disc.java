@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.greaper.mediaplayer.R;
 
@@ -92,7 +93,7 @@ public class Disc extends Fragment {
         //mListener = null;
     }
 
-//    public interface OnFragmentInteractionListener {
+    //    public interface OnFragmentInteractionListener {
 //        void onFragmentInteraction(Uri uri);
 //    }
 

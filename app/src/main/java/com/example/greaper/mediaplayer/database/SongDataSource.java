@@ -22,7 +22,8 @@ public class SongDataSource {
     private static final String KEY_NAME = SongSQLiteOpenHelper.KEY_NAME;
     private static final String KEY_PATH = SongSQLiteOpenHelper.KEY_PATH;
     private static final String TABLE_NAME = SongSQLiteOpenHelper.TABLE_NAME;
-    private String[] allCollumns = {KEY_ID, KEY_NAME, KEY_PATH};
+    private static final String KEY_POSITION = SongSQLiteOpenHelper.KEY_POSITION;
+    private String[] allCollumns = {KEY_ID, KEY_NAME, KEY_PATH, KEY_POSITION};
 
     private Context context;
 
@@ -43,12 +44,12 @@ public class SongDataSource {
         ContentValues values = new ContentValues();
         values.put(KEY_NAME, songModel.getTitle());
         values.put(KEY_PATH, songModel.getPath());
-
+        values.put(KEY_POSITION, songModel.getPosition());
         sqLiteDatabase.insert(TABLE_NAME, null, values);
     }
 
     public void deleteSong(SongModel songModel) {
-        sqLiteDatabase.delete(TABLE_NAME, KEY_NAME + "=" + songModel.getPath(), null);
+        sqLiteDatabase.delete(TABLE_NAME, KEY_NAME + "=?", new String[] {songModel.getTitle()});
     }
 
     public ArrayList<SongModel> getCurrentSong() {
@@ -74,7 +75,7 @@ public class SongDataSource {
     }
 
     private SongModel cursorToModel (Cursor cursor) {
-        SongModel song = new SongModel(cursor.getString(1), cursor.getString(2));
+        SongModel song = new SongModel(cursor.getString(1), cursor.getString(2), cursor.getInt(3));
         return song;
     }
 }

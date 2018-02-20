@@ -11,7 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:id="@+id/toolbar"
-        android:background="#d7e0f7" />
+        android:background="#d7e0f7">
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cb_all_list_song"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ASBNHJKJJJXX"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:id="@+id/txt_current_song"/>
+    </android.support.v7.widget.Toolbar>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,21 +34,10 @@
             android:layout_height="0dp"
             android:layout_weight="5.6"
             android:orientation="vertical">
-            <LinearLayout
+            <me.relex.circleindicator.CircleIndicator
+                android:id="@+id/indicator"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-                <ImageView
-                    android:id="@+id/icon_disc"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:src="@drawable/lock_black"/>
-                <ImageView
-                    android:id="@+id/icon_list_current_song"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:src="@drawable/lock_open"/>
-            </LinearLayout>
+                android:layout_height="48dp"/>
             <android.support.v4.view.ViewPager
                 android:id="@+id/vp_main"
                 android:layout_width="match_parent"
