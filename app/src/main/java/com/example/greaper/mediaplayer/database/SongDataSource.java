@@ -55,7 +55,7 @@ public class SongDataSource {
     public ArrayList<SongModel> getCurrentSong() {
         ArrayList<SongModel> arrayList = new ArrayList<>();
 
-        Cursor cursor = sqLiteDatabase.query(TABLE_NAME, allCollumns, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_NAME, allCollumns, null, null, null, null, KEY_POSITION + " ASC");
 
         if (cursor == null) {
             return null;
@@ -68,6 +68,18 @@ public class SongDataSource {
             cursor.moveToNext();
         }
         return arrayList;
+    }
+
+    public void updateSong(String title, int position) {
+        ContentValues values = new ContentValues();
+        values.put(KEY_POSITION, position);
+////        int update_index = sqLiteDatabase.update(TABLE_NAME, values, KEY_NAME + "=?", new String[] {title});
+//        if (update_index == 1) {
+//
+//        } else {
+//
+//        }
+        sqLiteDatabase.update(TABLE_NAME, values, KEY_NAME + "=?", new String[] {title});
     }
 
     public void deleteAllSong() {

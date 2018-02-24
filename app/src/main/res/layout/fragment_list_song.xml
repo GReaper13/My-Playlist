@@ -1,14 +1,19 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.greaper.mediaplayer.view.ListSong">
 
-    <ListView
-        android:id="@+id/lv_current_song"
+    <!--<ListView-->
+        <!--android:id="@+id/lv_current_song"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="@android:color/transparent">-->
+    <!--</ListView>-->
+    <com.woxthebox.draglistview.DragListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent">
-    </ListView>
+        android:id="@+id/dlv_list_song">
+    </com.woxthebox.draglistview.DragListView>
 
-</FrameLayout>
+</LinearLayout>

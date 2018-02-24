@@ -27,7 +27,6 @@ import com.example.greaper.mediaplayer.R;
 import com.example.greaper.mediaplayer.controller.AddSongAdapter;
 import com.example.greaper.mediaplayer.controller.ISong;
 import com.example.greaper.mediaplayer.controller.ImpAddSong;
-import com.example.greaper.mediaplayer.controller.ListSongAdapter;
 import com.example.greaper.mediaplayer.controller.SongManager;
 import com.example.greaper.mediaplayer.database.SongDataSource;
 import com.example.greaper.mediaplayer.model.AddSongModel;

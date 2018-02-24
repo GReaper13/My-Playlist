@@ -1,12 +1,9 @@
 package com.example.greaper.mediaplayer.controller;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.textclassifier.TextClassification;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -15,106 +12,103 @@ import android.widget.TextView;
 
 import com.example.greaper.mediaplayer.R;
 import com.example.greaper.mediaplayer.model.SongModel;
+import com.woxthebox.draglistview.DragItemAdapter;
 
 import java.util.ArrayList;
 
 /**
- * Created by GReaper on 1/21/2018.
+ * Created by GReaper on 2/20/2018.
  */
 
-public class ListSongAdapter extends BaseAdapter {
-
-    private ArrayList<SongModel> list = new ArrayList<>();
-    private Context context;
-    private ISong iSong;
+public class ListSongAdapter extends DragItemAdapter<SongModel, ListSongAdapter.ViewHolder> {
+    private int mLayoutId;
+    private int mGrabHandleId;
+    private boolean mDragOnLongPress;
     private boolean isEditSong;
     private ImpListSong impListSong;
 
-    public ListSongAdapter(ArrayList<SongModel> list, Context context, ISong iSong, boolean isEditSong, ImpListSong impListSong) {
-        this.list = list;
-        this.context = context;
-        this.iSong = iSong;
+    public ListSongAdapter(ArrayList<SongModel> list, int mLayoutId, int mGrabHandleId, boolean mDragOnLongPress, boolean isEditSong, ImpListSong impListSong) {
+        this.mLayoutId = mLayoutId;
+        this.mGrabHandleId = mGrabHandleId;
+        this.mDragOnLongPress = mDragOnLongPress;
         this.isEditSong = isEditSong;
         this.impListSong = impListSong;
+        setItemList(list);
     }
 
     @Override
-    public int getCount() {
-        return list.size();
+    public long getUniqueItemId(int position) {
+        return mItemList.get(position).getPosition();
     }
 
     @Override
-    public Object getItem(int i) {
-        return list.get(i);
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(mLayoutId, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    @Override
-    public View getView(final int i, View view, ViewGroup viewGroup) {
-
-        ViewHolder viewHolder;
-        if (view == null) {
-            LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view = layoutInflater.inflate(R.layout.song_item, viewGroup, false);
-
-            viewHolder = new ViewHolder();
-            viewHolder.txtName = view.findViewById(R.id.txt_name_item_list_song);
-            viewHolder.txtSinger = view.findViewById(R.id.txt_singer_item_list_song);
-            viewHolder.txtNumber = view.findViewById(R.id.txt_number_item_list_song);
-            viewHolder.checkBox = view.findViewById(R.id.cb_item_list_song);
-            viewHolder.imageView = view.findViewById(R.id.img_change_song);
-            viewHolder.linearLayout = view.findViewById(R.id.ll_item_list_song);
-            view.setTag(viewHolder);
-        } else {
-            viewHolder = (ViewHolder) view.getTag();
-        }
-        String[] title_str = list.get(i).getTitle().split("-");
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        super.onBindViewHolder(holder, position);
+        String[] title_str = mItemList.get(position).getTitle().split("-");
         if (title_str.length < 2) {
-            viewHolder.txtSinger.setText("");
+            holder.txtSinger.setText("");
         } else {
-            viewHolder.txtSinger.setText(title_str[1]);
+            holder.txtSinger.setText(title_str[1]);
         }
-        viewHolder.txtName.setText(title_str[0]);
-        viewHolder.txtNumber.setText(String.valueOf(i+1));
-        viewHolder.txtNumber.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                iSong.showSong(list.get(i));
-            }
-        });
-        changeBackgroundItem(viewHolder, i);
-        viewHolder.checkBox.setChecked(list.get(i).isSelectToDelete());
+        holder.txtName.setText(title_str[0]);
+        holder.txtNumber.setText(String.valueOf(position+1));
+        changeBackgroundItem(holder, position);
+        holder.checkBox.setChecked(mItemList.get(position).isSelectToDelete());
         if (isEditSong) {
-            viewHolder.txtNumber.setVisibility(View.INVISIBLE);
-            viewHolder.imageView.setVisibility(View.VISIBLE);
-            viewHolder.checkBox.setVisibility(View.VISIBLE);
+            holder.txtNumber.setVisibility(View.INVISIBLE);
+            holder.imageView.setVisibility(View.VISIBLE);
+            holder.checkBox.setVisibility(View.VISIBLE);
         } else {
-            viewHolder.txtNumber.setVisibility(View.VISIBLE);
-            viewHolder.imageView.setVisibility(View.INVISIBLE);
-            viewHolder.checkBox.setVisibility(View.INVISIBLE);
+            holder.txtNumber.setVisibility(View.VISIBLE);
+            holder.imageView.setVisibility(View.INVISIBLE);
+            holder.checkBox.setVisibility(View.INVISIBLE);
         }
-        final ViewHolder viewHolder1 = viewHolder;
-        viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        final ViewHolder viewHolder1 = holder;
+        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                list.get(i).setSelectToDelete(isChecked);
-                changeBackgroundItem(viewHolder1, i);
+                mItemList.get(position).setSelectToDelete(isChecked);
+                changeBackgroundItem(viewHolder1, position);
                 impListSong.checkCheckBoxSelectAll();
                 impListSong.checkHasASongSelected();
             }
         });
-        return view;
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                impListSong.clickSong(position);
+            }
+        });
     }
 
-    private class ViewHolder {
+
+
+    public class ViewHolder extends DragItemAdapter.ViewHolder {
         TextView txtName, txtNumber, txtSinger;
         CheckBox checkBox;
         ImageView imageView;
         LinearLayout linearLayout;
+
+        public ViewHolder(View itemView, int handleResId, boolean dragOnLongPress) {
+            super(itemView, handleResId, dragOnLongPress);
+        }
+
+        public ViewHolder(View itemView) {
+            super(itemView, mGrabHandleId, mDragOnLongPress);
+            txtName = itemView.findViewById(R.id.txt_name_item_list_song);
+            txtSinger = itemView.findViewById(R.id.txt_singer_item_list_song);
+            txtNumber = itemView.findViewById(R.id.txt_number_item_list_song);
+            checkBox = itemView.findViewById(R.id.cb_item_list_song);
+            imageView = itemView.findViewById(R.id.img_change_song);
+            linearLayout = itemView.findViewById(R.id.ll_item_list_song);
+        }
+
     }
 
     public boolean isEditSong() {
@@ -126,10 +120,12 @@ public class ListSongAdapter extends BaseAdapter {
     }
 
     private void changeBackgroundItem(ViewHolder viewHolder, int i) {
-        if (list.get(i).isSelectToDelete()) {
+        if (mItemList.get(i).isSelectToDelete()) {
             viewHolder.linearLayout.setBackgroundColor(Color.parseColor("#FF10E7D5"));
         } else {
             viewHolder.linearLayout.setBackgroundColor(Color.parseColor("#ffffff"));
         }
     }
+
+
 }

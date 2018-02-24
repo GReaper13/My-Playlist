@@ -15,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -99,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         viewPager.setAdapter(pageAdapter);
         circleIndicator.setViewPager(viewPager);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
         btnPlay.setOnClickListener(this);
         btnToNext.setOnClickListener(this);
@@ -125,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mediaPlayer.setDataSource(listSong.get(currentSongIndex).getPath());
             mediaPlayer.prepare();
             mediaPlayer.start();
-            txtCurrentSong.setText(listSong.get(currentSongIndex).getTitle());
+            txtCurrentSong.setText(listSong.get(currentSongIndex).getTitle().split("-")[0]);
             seekbar.setProgress(0);
             seekbar.setMax(100);
             btnPlay.setBackgroundResource(R.drawable.pause);
@@ -261,12 +265,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 boolean isDeleteSongIsPlaying = ((ListSong)pageAdapter.getRegisteredFragment(1)).deleteSong(listSong.get(currentSongIndex).getTitle());
                 initCurrentSong();
                 if (isDeleteSongIsPlaying) {
-                    playSong(0);
-                    currentSongIndex = 0;
-                    // TODO this can have some bugs
-                    // some bugs in remove listsong in ListSongFrag
+                    if (listSong.size() > 0) {
+                        playSong(0);
+                        currentSongIndex = 0;
+                    }
                 }
-                endEditSong();
+                menu.getItem(0).setVisible(false);
+                break;
         }
         return true;
     }
@@ -356,7 +361,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void getListSong(ArrayList<SongModel> arrayList) {
-
     }
 
     @Override
@@ -373,6 +377,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void hasSongSelected(boolean hasSongSelected) {
         menu.getItem(0).setVisible(hasSongSelected);
+    }
+
+    @Override
+    public void dragSongComplete() {
+        int newPosition = 0;
+        ArrayList<SongModel> listSongBefore = listSong;
+        listSong = songDataSource.getCurrentSong();
+        for (int i = 0; i < listSong.size(); i++) {
+            if (listSong.get(i).getTitle().equals(listSongBefore.get(currentSongIndex).getTitle())) {
+                newPosition = i;
+            }
+        }
+        currentSongIndex = newPosition;
     }
 
     @Override

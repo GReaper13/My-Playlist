@@ -7,4 +7,5 @@ package com.example.greaper.mediaplayer.controller;
 public interface ImpListSong {
     void checkCheckBoxSelectAll();
     void checkHasASongSelected();
+    void clickSong(int position);
 }
